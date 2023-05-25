@@ -1,0 +1,7 @@
+
+1. 修改hust_wireless_service.py里的账号密码
+2. 手动运行python执行hust_wireless_service.py确保正常运行（安装requests）
+3. 修改xml文件中executable一项的python路径。
+4. 执行.\hust-wireless-winsw.exe install
+5. 执行.\hust-wireless-winsw.exe start
+6. 看同目录的日志，是否运行正常。
