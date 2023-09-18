@@ -11,6 +11,7 @@ import requests
 import os
 import subprocess
 from contextlib import redirect_stdout
+import traceback
 
 platform = os.name # 'posix', 'nt', 'java'
 
@@ -45,40 +46,45 @@ def 已经在线():
         return os.system("ping -n 1 "+SCHOLL_DNS + "> nul") == 0
 
 def 认证():
-    username = USERNAME
-    password = PASSWORD
+    try:
+        username = USERNAME
+        password = PASSWORD
 
-    result = requests.get('http://www.baidu.com')
-    if result.text.find('baidu') != -1:
-        print('还是已经在线？: '+ result.text)
-        return True
-    if result.text.find('eportal') == -1:
-        print('认证失败1: '+ result.text)
-        return False
-    pattarn = re.compile(r"href=.*?\?(.*?)'")
-    query_str = pattarn.findall(result.text)[0]
+        result = requests.get('http://www.baidu.com')
+        if result.text.find('baidu') != -1:
+            print('还是已经在线？: '+ result.text)
+            return True
+        if result.text.find('eportal') == -1:
+            print('认证失败1: '+ result.text)
+            return False
+        pattarn = re.compile(r"href=.*?\?(.*?)'")
+        query_str = pattarn.findall(result.text)[0]
 
-    url = 'http://192.168.50.3:8080/eportal/InterFace.do?method=login'
+        url = 'http://192.168.50.3:8080/eportal/InterFace.do?method=login'
 
-    post_data = {
-        'userId': username,
-        'password': 加密(password, query_str),
-        'queryString': query_str,
-        'service': '',
-        'operatorPwd': '',
-        'operatorUserId': '',
-        'validcode': '',
-        'passwordEncrypt': 'true'
-    }
-    responce = requests.request('POST', url, data=post_data)
-    responce.encoding = 'UTF-8'
-    res_json = responce.json()
+        post_data = {
+            'userId': username,
+            'password': 加密(password, query_str),
+            'queryString': query_str,
+            'service': '',
+            'operatorPwd': '',
+            'operatorUserId': '',
+            'validcode': '',
+            'passwordEncrypt': 'true'
+        }
+        responce = requests.request('POST', url, data=post_data)
+        responce.encoding = 'UTF-8'
+        res_json = responce.json()
 
-    if res_json['result'] == 'success':
-        print('认证成功')
-        return True
-    else:
-        print('认证失败: ' + res_json['message'])
+        if res_json['result'] == 'success':
+            print('认证成功')
+            return True
+        else:
+            print('认证失败: ' + res_json['message'])
+            return False
+    except Exception as e:
+        traceback.print_exc()
+        print("出现异常：没有认证")
         return False
 
 def 加密(password, qstr):
